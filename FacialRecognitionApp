@@ -1,0 +1,98 @@
+import java.io.File;
+import java.io.IOException;
+import java.util.Scanner;
+
+public class FacialRecognitionApp {
+
+    public static double[] getRatios(double A, double B, double C, double D, double E, double F) {
+        double[] r = new double[15];
+
+        r[0] = A / B;
+        r[1] = A / C;
+        r[2] = A / D;
+        r[3] = A / E;
+        r[4] = A / F;
+        r[5] = B / C;
+        r[6] = B / D;
+        r[7] = B / E;
+        r[8] = B / F;
+        r[9] = C / D;
+        r[10] = C / E;
+        r[11] = C / F;
+        r[12] = D / E;
+        r[13] = D / F;
+        r[14] = E / F;
+
+        return r;
+    }
+
+    public static double sumSquaresPercentDifference(double[] original, double[] mystery) {
+        double sum = 0.0;
+
+        for (int i = 0; i < 15; i++) {
+            double diff = (mystery[i] - original[i]) / original[i];
+            sum += diff * diff;
+        }
+
+        return sum;
+    }
+
+    public static void main(String[] args) throws IOException {
+        Scanner keyboard = new Scanner(System.in);
+
+        String[] names = new String[5];
+        double[][] knownRatios = new double[5][15];
+
+        System.out.print("Enter the name of the face data file: ");
+        String filename = keyboard.nextLine();
+
+        File file = new File(filename);
+        Scanner inputFile = new Scanner(file);
+
+        for (int i = 0; i < 5; i++) {
+            names[i] = inputFile.next();
+            double A = inputFile.nextDouble();
+            double B = inputFile.nextDouble();
+            double C = inputFile.nextDouble();
+            double D = inputFile.nextDouble();
+            double E = inputFile.nextDouble();
+            double F = inputFile.nextDouble();
+
+            knownRatios[i] = getRatios(A, B, C, D, E, F);
+        }
+
+        System.out.println("Enter the 6 measurements for the mystery picture.");
+        System.out.print("A: ");
+        double A = keyboard.nextDouble();
+        System.out.print("B: ");
+        double B = keyboard.nextDouble();
+        System.out.print("C: ");
+        double C = keyboard.nextDouble();
+        System.out.print("D: ");
+        double D = keyboard.nextDouble();
+        System.out.print("E: ");
+        double E = keyboard.nextDouble();
+        System.out.print("F: ");
+        double F = keyboard.nextDouble();
+
+        double[] mysteryRatios = getRatios(A, B, C, D, E, F);
+
+        double smallestValue = sumSquaresPercentDifference(knownRatios[0], mysteryRatios);
+        String bestMatch = names[0];
+
+        for (int i = 0; i < 5; i++) {
+            double score = sumSquaresPercentDifference(knownRatios[i], mysteryRatios);
+            System.out.println(names[i] + " difference score = " + score);
+
+            if (score < smallestValue) {
+                smallestValue = score;
+                bestMatch = names[i];
+            }
+        }
+
+        System.out.println("The mystery picture is most likely: " + bestMatch);
+
+        inputFile.close();
+        keyboard.close();
+    }
+}
